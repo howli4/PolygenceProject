@@ -1,98 +1,114 @@
 import pgeocode
 from noaa_sdk import NOAA
 import numpy as np
-from matplotlib import pyplot as plt
 from suntime import Sun
+import datetime
+import pytz
+import time
 
-zipcode = 10001
-
-nomi = pgeocode.Nominatim('us')
-location = nomi.query_postal_code(zipcode)
-lat = location.get('latitude')
-lon = location.get('longitude')
-print("Latitude: ", lat)
-print("Longitude: ", lon)
-
-n = NOAA()
-res = n.get_forecasts(zipcode, 'US')  # update zipcode
-forecast = res[0]
-temp = forecast['temperature']
-# tempInterp = np.interp(temp, [30, 100], [1, 100])
-sun = forecast['shortForecast']
-print("Temperature: ", temp)
-# print("Interpolated Temperature: ", tempInterp)
-print("Short Forecast: ", sun)
-
-# add more (potentially add dictionary of modifier words)
-
-# modDict = {
-#     'Patchy': 0.25,
-#     'Partly': 0.5,
-#     'Mostly': 0.75,
-# }
-
-# any way to make this more efficient?
-
-# come up with equation other than multiplying
-
-# finalVal = tempInterp * sunVal * modVal / 100
-#
-# x = np.linspace(-1, 1, 1000)
-# z = 1/(1 + np.exp(-5 * x))
-# point = 1/(1 + np.exp(-5 * finalVal))
-#
-# plt.plot(x, z)
-# plt.xlabel("x")
-# plt.ylabel("Sigmoid(X)")
-# plt.plot(finalVal, point, 'ro')
-#
-# plt.show()
-#
-# print("Final Value: ", finalVal)
-# print("Sigmoid Value: ", point)
-
-sunDict = {
+zipcode = input("Zipcode: ")
+direction = input("Cardinal Direction (N,E,S,W): ")
+plant = input("Plant: ")
+lat = 0
+lon = 0
+sunDict = {  # https://www.takethreelighting.com/light-levels.html
     'Rain': 100,
     'Fog': 400,
     'Cloud': 700,
     'Sun': 1000
 }
+sevenAvg = np.array([0,0,0,0,0,0,0])
+currCount = 0
+totalDays = 0
+wf = 0
+wa = 0
+adj_f = 0
 
-sunSplit = sun.split()
-sunVal = 1
-for s in sunSplit:
-    for v in sunDict:
-        if v in s:
-            sunVal = sunDict[s]
-            break
+def init():
+    nomi = pgeocode.Nominatim('us')
+    location = nomi.query_postal_code(zipcode)
+    global lat, lon
+    lat = location.get('latitude')
+    lon = location.get('longitude')
+    plantSetup()
 
-print("Base FC Value: ", sunVal)
+def plantSetup():
+    global wf, wa
+    wf = 5 #days
+    wa = 200 #ml
 
-plantFacing = {
-    'North': 100,
-    'East': 500,
-    'South': 1000,
-    'West': 500
-}
-plantDir = 'West'
+def computeFC():
+    n = NOAA()
+    res = n.get_forecasts(zipcode, 'US')  # update zipcode
+    forecast = res[0]
+    sun = forecast['shortForecast']
+    print("Short Forecast: ", sun)
+    sunSplit = sun.split()
 
-sun = Sun(lat, lon)
-today_sr, today_ss = sun.get_sunrise_time(), sun.get_sunset_time()
-total_sun = (today_ss - today_sr).seconds / 3600
-totalFC = (sunVal + plantFacing[plantDir]) * total_sun
+    sunVal = 500
+    for s in sunSplit:
+        for v in sunDict:
+            if v in s:
+                sunVal = sunDict[v]
+                break
+    print("Base FC Value: ", sunVal)
 
-print("Total Sunlight: ", total_sun)
-print("Total FC Hours: ", totalFC)
+    plantFacing = {
+        'N': 100,
+        'E': 500,
+        'S': 1000,
+        'W': 500
+    }
 
-maxFC = 30000 #15 hours * 2k FC
-minFC = 2000 #10 hours * 200 FC
-avgFC = 15000 #12 hours * 1200 FC
-sunScale = np.interp(totalFC, [minFC, maxFC], [0, 1])
-print("scale of 0-1: ", sunScale)
+    sun = Sun(lat, lon)
+    today_sr, today_ss = sun.get_sunrise_time(), sun.get_sunset_time()
+    total_sun = (today_ss - today_sr).seconds / 3600
+    totalFC = (sunVal + plantFacing[direction]) * total_sun
+    print("Total Sunlight: ", total_sun)
+    print("Total FC Hours: ", totalFC)
 
-sevenDay = np.array([avgFC, avgFC, avgFC, avgFC, avgFC, avgFC, avgFC,])
+    # maxFC = 30000 #15 hours * 2k FC
+    # minFC = 2000 #10 hours * 200 FC
+    # sunScale = np.interp(totalFC, [minFC, maxFC], [0, 1])
+    # print("Scale of 0-1: ", sunScale)
+    getAvg(totalFC)
 
+def getAvg(newFC):
+    global sevenAvg
+    sevenAvg = np.roll(sevenAvg, 1)
+    sevenAvg[0] = newFC
+    avg = round(np.average(sevenAvg))
+    print("Average: ", avg)
+    print(sevenAvg)
 
+def adjFreq():
+    global wf, adj_f
+    if totalDays < 7:
+        adj_f = wf
+
+def deliverWater():
+    print("watered")
+    promptUser()
+
+def promptUser():
+    print("refill")
+
+def runLoop():
+    global currCount, totalDays
+    while True:
+        # current_time = datetime.datetime.now(pytz.timezone('America/Los_Angeles'))
+        # if current_time.hour == 12 and current_time.minute == 0 and current_time.second == 0:
+        computeFC()
+        currCount+=1
+        totalDays+=1
+        if currCount == adj_f:
+            deliverWater()
+            currCount = 0
+
+        time.sleep(5)
+
+init()
+runLoop()
 
 
 
