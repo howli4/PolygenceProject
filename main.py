@@ -80,11 +80,18 @@ def getAvg(newFC):
     avg = round(np.average(sevenAvg))
     print("Average: ", avg)
     print(sevenAvg)
+    adjFreq(avg)
 
-def adjFreq():
+def adjFreq(sunAvg):
     global wf, adj_f
+    maxFC = 30000 #15 hours * 2k FC
+    minFC = 2000 #10 hours * 200 FC
+    sunScale = np.interp(sunAvg, [minFC, maxFC], [-1, 1])
     if totalDays < 7:
-        adj_f = wf
+        adj_f = 0
+    else:
+        adj_f = wf * sunScale
+    adj_f = round(adj_f + wf)
 
 def deliverWater():
     print("watered")
@@ -96,16 +103,14 @@ def promptUser():
 def runLoop():
     global currCount, totalDays
     while True:
-        # current_time = datetime.datetime.now(pytz.timezone('America/Los_Angeles'))
-        # if current_time.hour == 12 and current_time.minute == 0 and current_time.second == 0:
-        computeFC()
-        currCount+=1
-        totalDays+=1
-        if currCount == adj_f:
-            deliverWater()
-            currCount = 0
 
-        time.sleep(5)
+        current_time = datetime.datetime.now(pytz.timezone('America/Los_Angeles'))
+        if current_time.hour == 12 and current_time.minute == 0 and current_time.second == 0:
+            computeFC()
+            if currCount == adj_f:
+                deliverWater()
+                currCount = 0
+            totalDays += 1
 
 init()
 runLoop()
