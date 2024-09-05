@@ -1,0 +1,98 @@
+import numpy as np
+import pgeocode
+from noaa_sdk import NOAA
+from suntime import Sun
+import datetime
+import pytz
+import time
+
+class Plant():
+    """Comment"""
+    plant_facing = {
+        'N': 100,
+        'E': 500,
+        'S': 1000,
+        'W': 500
+    }
+
+    sun_dict = {  # https://www.takethreelighting.com/light-levels.html
+    'Rain': 100,
+    'Fog': 400,
+    'Cloud': 700,
+    'Sun': 1000
+    }  
+
+    def __init__(self,
+                 zipcode: int,
+                 direction: str,
+                 plant_type: str):
+        self.zipcode = zipcode
+        self.direction = direction
+        self.plant_type = plant_type
+
+        # Setup default parameters
+        self.seven_day_avg = np.array([0,0,0,0,0,0,0])
+        self.count = 0
+        self.total_count = 0
+        self.adjusted_freq = 0
+
+        self.init_location()
+        self.init_watering_schedule()
+        self.check_plant_direction()
+
+    def init_location(self) -> None:
+        nomi = pgeocode.Nominatim('us')
+        location = nomi.query_postal_code(self.zipcode)
+        self.lat = location.get('latitude')
+        self.lon = location.get('longitude')
+
+    def init_watering_schedule(self) -> None:
+        #TODO: Make these actual functions lol
+        self.watering_freq = 5
+        self.watering_amount = 200
+
+    def check_plant_direction(self) -> None:
+        try:
+            self.plant_direction = self.plant_facing[self.direction]
+        except:
+            raise ValueError("Use a cardinal direction N,E,W,S")
+        
+    def update(self):
+        """Grab today's daily footcandle computation."""
+        n = NOAA()
+        res = n.get_forecasts(self.zipcode, 'US')  # update zipcode
+        forecast = res[0]
+        sun = forecast['shortForecast']
+        print("Short Forecast: ", sun)
+        sunSplit = sun.split()
+
+        sunVal = 500
+        for s in sunSplit:
+            for v in self.sun_dict:
+                if v in s:
+                    sun_val= self.sun_dict[v]
+                    break
+        print("Base FC Value: ", sun_val)
+
+        sun = Sun(self.lat, self.lon)
+        today_sr, today_ss = sun.get_sunrise_time(), sun.get_sunset_time()
+        total_sun = (today_ss - today_sr).seconds / 3600
+        totalFC = (sunVal + self.plant_facing[self.direction]) * total_sun
+        self.update_seven_day_avg(totalFC)
+
+    def update_seven_day_avg(self, new_value):
+        self.seven_day_avg = np.roll(self.seven_day_avg, 1)
+        self.seven_day_avg[0] = new_value
+        sun_avg = round(np.average(self.seven_day_avg))
+        self.adjust_freq(sun_avg)
+
+    def adjust_freq(self, sun_avg):
+        maxFC = 30000 #15 hours * 2k FC
+        minFC = 2000 #10 hours * 200 FC
+        sunScale = np.interp(sun_avg, [minFC, maxFC], [-1, 1])
+        if self.total_count < 7:
+            adj_f = 0
+        else:
+            adj_f = self.watering_freq * sunScale
+
+        self.adjusted_freq = round(adj_f + self.watering_freq)
