@@ -2,9 +2,6 @@ import numpy as np
 import pgeocode
 from noaa_sdk import NOAA
 from suntime import Sun
-import datetime
-import pytz
-import time
 
 class Plant():
     """Comment"""
