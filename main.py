@@ -3,12 +3,12 @@ import pytz
 import time
 from plant import Plant
 from gpiozero import AngularServo
-
+from gpiozero.pins.pigpio import PiGPIOFactory
 
 def deliverWater(servo, watering_amount):
-    servo.angle = -35
+    servo.angle = -40
     time.sleep(20)
-    servo.angle = -95
+    servo.angle = -90
     promptUser(watering_amount)
 
 def promptUser(amount):
@@ -25,7 +25,9 @@ if __name__ == "__main__":
 
     # Initialize the plant object
     my_plant = Plant(zipcode, direction, plant_type)
-    servo = AngularServo(18, min_pulse_width=0.5/1000, max_pulse_width=2.5/1000)
+
+    #Initialize the servo
+    servo = AngularServo(18, min_pulse_width=0.5/1000, max_pulse_width=2.5/1000, pin_factory=PiGPIOFactory())
     servo.angle = -90
 
     # Run our iterative loop
