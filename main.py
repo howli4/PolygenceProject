@@ -1,4 +1,6 @@
 import datetime
+from timezonefinder import TimezoneFinder
+import pgeocode
 import pytz
 import time
 from plant import Plant
@@ -23,8 +25,16 @@ if __name__ == "__main__":
     direction = input("Cardinal Direction (N,E,S,W): ")
     plant_type = input("Plant: ")
 
+    # Find timezone from provided zipcode
+    obj = TimezoneFinder()
+    nomi = pgeocode.Nominatim('us')
+    location = nomi.query_postal_code(zipcode)
+    lat = location.get('latitude')
+    lon = location.get('longitude')
+    tz = obj.timezone_at(lng=lon, lat=lat)
+
     # Initialize the plant object
-    my_plant = Plant(zipcode, direction, plant_type)
+    my_plant = Plant(zipcode, lat, lon, direction, plant_type)
 
     #Initialize the servo
     servo = AngularServo(18, min_pulse_width=0.5/1000, max_pulse_width=2.5/1000, pin_factory=PiGPIOFactory())
@@ -33,7 +43,7 @@ if __name__ == "__main__":
     # Run our iterative loop
     # TODO: check current time, subtract from noon, then 'sleep' for that long
     while True:
-        current_time = datetime.datetime.now(pytz.timezone('America/Los_Angeles'))
+        current_time = datetime.datetime.now(pytz.timezone(tz))
         if current_time.hour == 12 and current_time.minute == 0 and current_time.second == 0:
             my_plant.update()
             if my_plant.count == my_plant.adjusted_freq:

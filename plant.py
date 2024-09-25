@@ -21,9 +21,13 @@ class Plant():
 
     def __init__(self,
                  zipcode: int,
+                 lat: float,
+                 lon: float,
                  direction: str,
                  plant_type: str):
         self.zipcode = zipcode
+        self.lat = lat
+        self.lon = lon
         self.direction = direction
         self.plant_type = plant_type
 
@@ -36,12 +40,6 @@ class Plant():
         self.init_location()
         self.init_watering_schedule()
         self.check_plant_direction()
-
-    def init_location(self) -> None:
-        nomi = pgeocode.Nominatim('us')
-        location = nomi.query_postal_code(self.zipcode)
-        self.lat = location.get('latitude')
-        self.lon = location.get('longitude')
 
     def init_watering_schedule(self) -> None:
         #TODO: Make these actual functions lol
