@@ -3,7 +3,7 @@ from noaa_sdk import NOAA
 from suntime import Sun
 
 class Plant():
-    """Comment"""
+    """Class that represents the plant being watered"""
     plant_facing = {
         'N': 100,
         'E': 500,
@@ -34,6 +34,7 @@ class Plant():
                  lon: float,
                  direction: str,
                  plant_type: str):
+        """Constructor"""
         self.zipcode = zipcode  
         self.lat = lat
         self.lon = lon
@@ -50,6 +51,7 @@ class Plant():
         self.check_plant_direction()
 
     def init_watering_schedule(self) -> None:
+        """Sets base watering amount and frequency"""
         try:
             self.watering_freq = self.plant_freq[self.plant_type]
             self.watering_amount = self.plant_amnt[self.plant_type]
@@ -57,6 +59,7 @@ class Plant():
             raise ValueError("Plant not found in local list")
         
     def check_plant_direction(self) -> None:
+        """Converts plant direction to FC value"""
         try:
             self.plant_direction = self.plant_facing[self.direction]
         except:
@@ -86,12 +89,14 @@ class Plant():
         self.update_seven_day_avg(totalFC)
 
     def update_seven_day_avg(self, new_value):
+        """Adds new sunlight value to array and computes new 7-day average"""
         self.seven_day_avg = np.roll(self.seven_day_avg, 1)
         self.seven_day_avg[0] = new_value
         sun_avg = round(np.average(self.seven_day_avg))
         self.adjust_freq(sun_avg)
 
     def adjust_freq(self, sun_avg):
+        """Adjusts watering frequency based on average sunlight"""
         maxFC = 30000 #15 hours * 2k FC
         minFC = 2000 #10 hours * 200 FC
         sunScale = np.interp(sun_avg, [minFC, maxFC], [-1, 1])
