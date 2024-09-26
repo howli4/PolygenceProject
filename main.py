@@ -1,7 +1,5 @@
-import datetime
-from timezonefinder import TimezoneFinder
+from datetime import datetime
 import pgeocode
-import pytz
 import time
 from plant import Plant
 from gpiozero import AngularServo
@@ -17,8 +15,6 @@ def promptUser(amount):
     print("refill with ", amount, " ml of water")
 
 if __name__ == "__main__":
-    # This is your main fcn
-    # TODO: make this a python package
 
     # Prompt user for setup
     zipcode = input("Zipcode: ")
@@ -26,12 +22,10 @@ if __name__ == "__main__":
     plant_type = input("Plant: ")
 
     # Find timezone from provided zipcode
-    obj = TimezoneFinder()
     nomi = pgeocode.Nominatim('us')
     location = nomi.query_postal_code(zipcode)
     lat = location.get('latitude')
     lon = location.get('longitude')
-    tz = obj.timezone_at(lng=lon, lat=lat)
 
     # Initialize the plant object
     my_plant = Plant(zipcode, lat, lon, direction, plant_type)
@@ -42,12 +36,18 @@ if __name__ == "__main__":
 
     # Run our iterative loop
     # TODO: check current time, subtract from noon, then 'sleep' for that long
+
+    tz = datetime.now().astimezone().tzinfo
+    current_time = datetime.now(tz)
+    next_noon = datetime(year=current_time.year, month=current_time.month, day=current_time.day+1, hour=12, tzinfo=tz)
+    wait_time = (next_noon-current_time).seconds
+    time.sleep(wait_time)  # waiting until the next noon
+    
     while True:
-        current_time = datetime.datetime.now(pytz.timezone(tz))
-        if current_time.hour == 12 and current_time.minute == 0 and current_time.second == 0:
-            my_plant.update()
-            if my_plant.count == my_plant.adjusted_freq:
-                deliverWater(servo, my_plant.watering_amount)
-                my_plant.count = 0
-            my_plant.total_count += 1
-            my_plant.count += 1
+        my_plant.update()
+        if my_plant.count == my_plant.adjusted_freq:
+            deliverWater(servo, my_plant.watering_amount)
+            my_plant.count = 0
+        my_plant.total_count += 1
+        my_plant.count += 1
+        time.sleep(86400)  # 24 hours in seconds

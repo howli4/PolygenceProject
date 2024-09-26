@@ -1,5 +1,4 @@
 import numpy as np
-import pgeocode
 from noaa_sdk import NOAA
 from suntime import Sun
 
@@ -13,11 +12,21 @@ class Plant():
     }
 
     sun_dict = {  # https://www.takethreelighting.com/light-levels.html
-    'Rain': 100,
-    'Fog': 400,
-    'Cloud': 700,
-    'Sun': 1000
+        'Rain': 100,
+        'Fog': 400,
+        'Cloud': 700,
+        'Sun': 1000
     }  
+
+    plant_amnt = {
+        'Snake Plant': 200,
+        'Generic': 200
+    }
+
+    plant_freq = {
+        'Snake Plant': 7,
+        'Generic': 4
+    }
 
     def __init__(self,
                  zipcode: int,
@@ -25,7 +34,7 @@ class Plant():
                  lon: float,
                  direction: str,
                  plant_type: str):
-        self.zipcode = zipcode
+        self.zipcode = zipcode  
         self.lat = lat
         self.lon = lon
         self.direction = direction
@@ -37,15 +46,16 @@ class Plant():
         self.total_count = 0
         self.adjusted_freq = 0
 
-        self.init_location()
         self.init_watering_schedule()
         self.check_plant_direction()
 
     def init_watering_schedule(self) -> None:
-        #TODO: Make these actual functions lol
-        self.watering_freq = 5
-        self.watering_amount = 200
-
+        try:
+            self.watering_freq = self.plant_freq[self.plant_type]
+            self.watering_amount = self.plant_amnt[self.plant_type]
+        except:
+            raise ValueError("Plant not found in local list")
+        
     def check_plant_direction(self) -> None:
         try:
             self.plant_direction = self.plant_facing[self.direction]
