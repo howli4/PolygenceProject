@@ -20,7 +20,7 @@ A dynamic plant watering system that utilizes data from the National Weather Ser
 ## Software Setup
 1. Install required packages.\
 `sudo apt update`\
-`pip install datetime pgeocode time gpiozero numpy noaa-sdk suntime pigpio`
+`pip install datetime pgeocode gpiozero numpy noaa-sdk suntime pigpio`
 2. Clone Github repository\
 `cd <install location>`\
 `git clone https://github.com/howli4/PolygenceProject.git`
