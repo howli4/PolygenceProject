@@ -8,8 +8,7 @@ A dynamic plant watering system that utilizes data from the National Weather Ser
 4. [3D Printed Parts](https://cad.onshape.com/documents/d2bddf53dcd5558dbb8bdeef/w/6d26f46bb79cac228e16e5e8/e/d892201bd4037640de4d20c5?renderMode=0&uiState=67101d823e284f6f3d667be1)
 5. O-rings (5/16" ID, 7/16" OD, 1/16" Width)
 6. Hot Glue Gun + Hot Glue Sticks
-7. Monitor + Keyboard + Mouse for the RPi (or a separate device)
-8. Internet Connection
+7. Internet Connection
 
 ## Hardware Setup
 1. 3D print all required parts.
@@ -19,4 +18,6 @@ A dynamic plant watering system that utilizes data from the National Weather Ser
 5. Connect the servo's ground pin to one of the RPi's GPIO ground pins, the servo's power pin to one of the RPI's 5V supply pins, and the PWM pin to the RPi's GPIO pin 18.
 
 ## Software Setup
-1. Connect to the Raspberry 
+`sudo apt update`\
+`pip install datetime pgeocode time gpiozero numpy noaa-sdk suntime`\
+`git clone `
