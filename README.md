@@ -1,6 +1,6 @@
 # Dynamic Plant Watering System
-A dynamic plant watering system that utilizes data from the National Weather Service, as well as the plant's orientation and location to adjust watering frequency.
-![Alt text](https://github.com/athornton1618/mintbot/blob/main/mintbot_demo.jpg?raw=true)
+A dynamic plant watering system that utilizes data from the National Weather Service, as well as the plant's orientation and location to adjust watering frequency.\
+<img src="https://github.com/howli4/PolygenceProject/blob/master/System%20Picture.jpg" alt="drawing" width="500"/>
 
 ## Materials
 1. Towerpro SG90 Analog Servo (with a single servo arm)
