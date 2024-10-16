@@ -19,12 +19,18 @@ class Plant():
     }  
 
     plant_amnt = {
-        'Snake Plant': 200,
+        'Fiddle-leaf Fig': 500,
+        'Monstera': 500,
+        'Snake Plant': 500,
+        'Orchid': 300,
         'Generic': 200
     }
 
     plant_freq = {
-        'Snake Plant': 7,
+        'Fiddle-leaf Fig': 7,
+        'Monstera': 10,
+        'Snake Plant': 14,
+        'Orchid': 9,
         'Generic': 4
     }
 
@@ -33,13 +39,17 @@ class Plant():
                  lat: float,
                  lon: float,
                  direction: str,
-                 plant_type: str):
+                 plant_type: str,
+                 cust_amnt: float,
+                 cust_freq: int):
         """Constructor"""
         self.zipcode = zipcode  
         self.lat = lat
         self.lon = lon
         self.direction = direction
         self.plant_type = plant_type
+        self.cust_amnt = cust_amnt
+        self.cust_freq = cust_freq
 
         # Setup default parameters
         self.seven_day_avg = np.array([0,0,0,0,0,0,0])
@@ -53,17 +63,21 @@ class Plant():
     def init_watering_schedule(self) -> None:
         """Sets base watering amount and frequency"""
         try:
-            self.watering_freq = self.plant_freq[self.plant_type]
-            self.watering_amount = self.plant_amnt[self.plant_type]
+            if self.plant_type == 'Custom':
+                self.watering_amount = self.cust_amnt
+                self.watering_freq = self.cust_freq
+            else:
+                self.watering_freq = self.plant_freq[self.plant_type]
+                self.watering_amount = self.plant_amnt[self.plant_type]
         except:
-            raise ValueError("Plant not found in local list")
+            raise ValueError('Plant not found in local list')
         
     def check_plant_direction(self) -> None:
         """Converts plant direction to FC value"""
         try:
             self.plant_direction = self.plant_facing[self.direction]
         except:
-            raise ValueError("Use a cardinal direction N,E,W,S")
+            raise ValueError('Use a cardinal direction N,E,W,S')
         
     def update(self):
         """Grab today's daily footcandle computation."""
@@ -71,7 +85,6 @@ class Plant():
         res = n.get_forecasts(self.zipcode, 'US')  # update zipcode
         forecast = res[0]
         sun = forecast['shortForecast']
-        print("Short Forecast: ", sun)
         sunSplit = sun.split()
 
         sunVal = 500
@@ -80,7 +93,6 @@ class Plant():
                 if v in s:
                     sun_val= self.sun_dict[v]
                     break
-        print("Base FC Value: ", sun_val)
 
         sun = Sun(self.lat, self.lon)
         today_sr, today_ss = sun.get_sunrise_time(), sun.get_sunset_time()

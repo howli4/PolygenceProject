@@ -14,14 +14,20 @@ def deliverWater(servo, watering_amount):
 
 def promptUser(amount):
     """Prompts user to refill water reservoir after watering is complete"""
-    print("refill with ", amount, " ml of water")
+    print('refill with ', amount, ' ml of water')
 
 if __name__ == "__main__":
 
     # Prompt user for setup
-    zipcode = input("Zipcode: ")
-    direction = input("Cardinal Direction (N,E,S,W): ")
-    plant_type = input("Plant: ")
+    zipcode = input('Zipcode: ')
+    direction = input('Cardinal Direction (N,E,S,W): ')
+    plant_type = input('Plant (Enter "Custom" to customize plant information): ')
+    cust_amnt = 0
+    cust_freq = 0
+    if plant_type == 'Custom':
+        cust_amnt = input('Custom Water Amount (ml): ')
+        cust_freq = input('Custom Base Frequency (days): ')
+    print('Program is Fully Initialized.')
 
     # Find coordinates from provided zipcode
     nomi = pgeocode.Nominatim('us')
@@ -30,7 +36,7 @@ if __name__ == "__main__":
     lon = location.get('longitude')
 
     # Initialize the plant object
-    my_plant = Plant(zipcode, lat, lon, direction, plant_type)
+    my_plant = Plant(zipcode, lat, lon, direction, plant_type, cust_amnt, cust_freq)
 
     #Initialize the servo
     servo = AngularServo(18, min_pulse_width=0.5/1000, max_pulse_width=2.5/1000, pin_factory=PiGPIOFactory())
