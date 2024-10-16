@@ -18,6 +18,12 @@ A dynamic plant watering system that utilizes data from the National Weather Ser
 5. Connect the servo's ground pin to one of the RPi's GPIO ground pins, the servo's power pin to one of the RPI's 5V supply pins, and the PWM pin to the RPi's GPIO pin 18.
 
 ## Software Setup
+1. Install required packages.\
 `sudo apt update`\
-`pip install datetime pgeocode time gpiozero numpy noaa-sdk suntime`\
-`git clone `
+`pip install datetime pgeocode time gpiozero numpy noaa-sdk suntime pigpio`
+2. Clone Github repository\
+`cd <install location>`\
+`git clone https://github.com/howli4/PolygenceProject.git`
+3. Run the Python script\
+`cd /PolygenceProject`\
+`python main.py`
