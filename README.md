@@ -8,10 +8,15 @@ A dynamic plant watering system that utilizes data from the National Weather Ser
 4. [3D Printed Parts](https://cad.onshape.com/documents/d2bddf53dcd5558dbb8bdeef/w/6d26f46bb79cac228e16e5e8/e/d892201bd4037640de4d20c5?renderMode=0&uiState=67101d823e284f6f3d667be1)
 5. O-rings (5/16" ID, 7/16" OD, 1/16" Width)
 6. Hot Glue Gun + Hot Glue Sticks
+7. Monitor + Keyboard + Mouse for the RPi (or a separate device)
+8. Internet Connection
 
 ## Hardware Setup
 1. 3D print all required parts.
 2. Glue the actuator flap onto the servo arm and attach it to the SG90 servo. Make sure to rotate the arm so it is at -90 degrees.
 3. Push an O-ring into the indent on the bottom of the reservoir, glue the servo into the mount, glue the servo and mount onto the bottom of the reservoir as shown in the CAD, and glue the supports in place.
 4. Set up the RPi 4B with the latest version of Raspberry Pi OS
-5. Connect the ground pin of the servo to a ground pin, the power pin to a 5V supply pin, and the PWM pin to pin 
+5. Connect the servo's ground pin to one of the RPi's GPIO ground pins, the servo's power pin to one of the RPI's 5V supply pins, and the PWM pin to the RPi's GPIO pin 18.
+
+## Software Setup
+1. Connect to the Raspberry 
