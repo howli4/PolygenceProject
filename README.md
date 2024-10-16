@@ -1,7 +1,7 @@
 # Dynamic Plant Watering System
 A dynamic plant watering system that utilizes data from the National Weather Service, as well as the plant's orientation and location to adjust watering frequency.
 
-# Materials
+## Materials
 1. Towerpro SG90 Digital Servo (with a single servo arm)
 2. 3 Female-Male Jumper Wires
 3. Raspberry Pi 4 Model B
